@@ -6,7 +6,6 @@ package util;
 
 import java.nio.FloatBuffer;
 import java.util.List;
-import org.lwjgl.opengl.GL30;
 
 
 /**
@@ -47,7 +46,7 @@ public class VertexBuffer extends BufferObject {
 
     @Override
     public void disable() {
-        GL30.glBindVertexArray(0);
+        OpenGL.glBindVertexArray(0);
     }
 
     @Override
