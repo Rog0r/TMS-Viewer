@@ -4,7 +4,6 @@
  */
 package util;
 
-import org.lwjgl.opengl.GL15;
 
 /**
  *
@@ -13,18 +12,18 @@ import org.lwjgl.opengl.GL15;
 public abstract class BufferObject {
 
     private int id;
-    private int bufferTarget;
+    private OpenGL.GL_BUFFER_TARGET bufferTarget;
 
-    public BufferObject(int bufferTarget) {
+    public BufferObject(OpenGL.GL_BUFFER_TARGET bufferTarget) {
         this.bufferTarget = bufferTarget;
-        id = GL15.glGenBuffers();
+        id = OpenGL.glGenBuffers();
     }
 
     public int getId() {
         return id;
     }
 
-    public int getBufferTarget() {
+    public OpenGL.GL_BUFFER_TARGET getBufferTarget() {
         return bufferTarget;
     }
 
@@ -33,6 +32,6 @@ public abstract class BufferObject {
     public abstract void disable();
 
     public void delete() {
-        GL15.glDeleteBuffers(id);
+        OpenGL.glDeleteBuffers(id);
     }
 }
