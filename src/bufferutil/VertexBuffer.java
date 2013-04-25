@@ -4,8 +4,6 @@
  */
 package bufferutil;
 
-import bufferutil.BufferObject;
-import shaderutil.VertexAttribute;
 import java.nio.FloatBuffer;
 import java.util.List;
 import opengl_util.OpenGL;

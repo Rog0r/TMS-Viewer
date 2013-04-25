@@ -1,6 +1,7 @@
 package shaderutil;
 
 import java.nio.*;
+import java.util.Objects;
 import opengl_util.OpenGL;
 
 public final class UniformData {
@@ -15,6 +16,10 @@ public final class UniformData {
         this.type = OpenGL.GL_UNIFORM_TYPE.parseType(type);
         this.name = name;
         this.location = -1;
+    }
+    
+    public void setLocation(int program_id) {
+        location = OpenGL.glGetUniformLocation(program_id, name);
     }
 
     public void setData(int data) {
@@ -236,4 +241,21 @@ public final class UniformData {
     public boolean isTranspose() {
         return transpose;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final UniformData other = (UniformData) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

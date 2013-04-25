@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package shaderutil;
+package bufferutil;
 
 /**
  *
@@ -11,7 +11,7 @@ package shaderutil;
 public class VertexAttribute {
 
     private int index;
-    private int valsPerVertex;
+    private int size;
     private String name;
     private long bufferOffset;
     private int stride;
@@ -26,7 +26,7 @@ public class VertexAttribute {
     
     public VertexAttribute(int index, int valsPerVertex, String name, int stride, long bufferOffset) {
         this.index = index;
-        this.valsPerVertex = valsPerVertex;
+        this.size = valsPerVertex;
         this.name = name;
         this.stride = stride;
         this.bufferOffset = bufferOffset;
@@ -41,8 +41,8 @@ public class VertexAttribute {
         return index;
     }
 
-    public int getValsPerVertex() {
-        return this.valsPerVertex;
+    public int getSize() {
+        return this.size;
     }
     
     public int getStride() {

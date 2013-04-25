@@ -11,6 +11,6 @@ package shaderutil;
 public class test {
 
     public static void main(String[] args) {
-        ShaderProgram2 sp = new ShaderProgram2("shader/standard_vs.glsl", "test", null);
+        ShaderProgram sp = new ShaderProgram("shader/standard_vs.glsl", "shader/standard_fs.glsl", null);
     }
 }

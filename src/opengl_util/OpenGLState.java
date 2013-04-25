@@ -33,7 +33,7 @@ public class OpenGLState {
         ON, OFF;
 
         public static int getKey() {
-            return GL11.GL_DEPTH;
+            return GL11.GL_DEPTH_TEST;
         }
     }
     private Vector4f clear_color;

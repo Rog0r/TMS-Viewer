@@ -4,10 +4,12 @@
  */
 package opengl_util;
 
-import shaderutil.VertexAttribute;
+import bufferutil.VertexAttribute;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -17,13 +19,28 @@ import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL32;
-import shaderutil.GLUniformData;
+import shaderutil.UniformData;
 
 /**
  *
  * @author Roger
  */
 public final class OpenGL {
+
+    public static enum GL_BOOLEAN {
+
+        TRUE(GL11.GL_TRUE),
+        FALSE(GL11.GL_FALSE);
+        private int value;
+
+        private GL_BOOLEAN(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
     public static enum GL_ERROR_FLAG {
 
@@ -48,7 +65,7 @@ public final class OpenGL {
         UNIFORM_BUFFER(GL31.GL_UNIFORM_BUFFER);
         private int target;
 
-        GL_BUFFER_TARGET(int target) {
+        private GL_BUFFER_TARGET(int target) {
             this.target = target;
         }
 
@@ -64,7 +81,7 @@ public final class OpenGL {
         DYNAMIC_DRAW(GL15.GL_DYNAMIC_DRAW), DYNAMIC_READ(GL15.GL_DYNAMIC_READ), DYNAMIC_COPY(GL15.GL_DYNAMIC_COPY);
         private int usage;
 
-        GL_BUFFER_USAGE(int usage) {
+        private GL_BUFFER_USAGE(int usage) {
             this.usage = usage;
         }
 
@@ -80,7 +97,7 @@ public final class OpenGL {
         GEOMETRY_SHADER(GL32.GL_GEOMETRY_SHADER);
         private int shader_type;
 
-        GL_SHADER_TYPE(int shader_type) {
+        private GL_SHADER_TYPE(int shader_type) {
             this.shader_type = shader_type;
         }
 
@@ -123,6 +140,52 @@ public final class OpenGL {
             return null;
         }
     }
+
+    public static enum GL_PROGRAM_PARAMETER {
+
+        DELETE_STATUS(GL20.GL_DELETE_STATUS),
+        LINK_STATUS(GL20.GL_LINK_STATUS),
+        VALIDATE_STATUS(GL20.GL_VALIDATE_STATUS),
+        INFO_LOG_LENGTH(GL20.GL_INFO_LOG_LENGTH),
+        ATTACHED_SHADERS(GL20.GL_ATTACHED_SHADERS),
+        ACTIVE_ATTRIBUTES(GL20.GL_ACTIVE_ATTRIBUTES),
+        ACTIVE_ATTRIBUTE_MAX_LENGTH(GL20.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH),
+        ACTIVE_UNIFORMS(GL20.GL_ACTIVE_UNIFORMS),
+        ACTIVE_UNIFORMS_MAX_LENGTH(GL20.GL_ACTIVE_UNIFORM_MAX_LENGTH),
+        TRANSFORM_FEEDBACK_BUFFER_MODE(GL30.GL_TRANSFORM_FEEDBACK_BUFFER_MODE),
+        TRANSFORM_FEEDBACK_VARYINGS(GL30.GL_TRANSFORM_FEEDBACK_VARYINGS),
+        TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH(GL30.GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH),
+        GEOMETRY_VERTICES_OUT(GL32.GL_GEOMETRY_VERTICES_OUT),
+        GEOMETRY_INPUT_TYPE(GL32.GL_GEOMETRY_INPUT_TYPE),
+        GEOMETRY_OUTPUT_TYPE(GL32.GL_GEOMETRY_OUTPUT_TYPE);
+        private int code;
+
+        private GL_PROGRAM_PARAMETER(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+    }
+
+    public static enum GL_SHADER_PARAMETER {
+
+        SHADER_TYPE(GL20.GL_SHADER_TYPE),
+        DELETE_STATUS(GL20.GL_DELETE_STATUS),
+        COMPILE_STATUS(GL20.GL_COMPILE_STATUS),
+        INFO_LOG_LENGTH(GL20.GL_INFO_LOG_LENGTH),
+        SHADER_SOURCE_LENGTH(GL20.GL_SHADER_SOURCE_LENGTH);
+        private int code;
+
+        private GL_SHADER_PARAMETER(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+    }
     private static final OpenGL INSTANCE = new OpenGL();
     private OpenGLState current_state;
     private static boolean debug;
@@ -133,7 +196,7 @@ public final class OpenGL {
         } catch (LWJGLException ex) {
             Logger.getLogger(OpenGL.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.debug = false;
+        this.debug = true;
         this.setState(new OpenGLState());
     }
 
@@ -144,15 +207,27 @@ public final class OpenGL {
     public void setState(OpenGLState state) {
         if (current_state == null || current_state.getClearColor() != state.getClearColor()) {
             GL11.glClearColor(state.getClearColor().x, state.getClearColor().y, state.getClearColor().z, state.getClearColor().w);
+            if (debug) {
+                printError("setting clear color");
+            }
         }
         if (current_state == null || current_state.getCullFace() != state.getCullFace()) {
             GL11.glCullFace(state.getCullFace().getMode());
+            if (debug) {
+                printError("setting cull face to " + state.getCullFace());
+            }
         }
         if (current_state == null || current_state.getDepthTest() != state.getDepthTest()) {
             if (state.getDepthTest() == OpenGLState.GL_DEPTH_TEST.ON) {
                 GL11.glEnable(OpenGLState.GL_DEPTH_TEST.getKey());
+                if (debug) {
+                    printError("enabling depth test");
+                }
             } else {
                 GL11.glDisable(OpenGLState.GL_DEPTH_TEST.getKey());
+                if (debug) {
+                    printError("disabling depth test");
+                }
             }
         }
 
@@ -230,9 +305,9 @@ public final class OpenGL {
         }
     }
 
-    public static void glVertexAttribPointer(VertexAttribute shader_attribute) {
-        GL20.glVertexAttribPointer(shader_attribute.getIndex(), shader_attribute.getValsPerVertex(), GL11.GL_FLOAT, false, shader_attribute.getStride(),
-                shader_attribute.getBufferOffset());
+    public static void glVertexAttribPointer(VertexAttribute attribute) {
+        GL20.glVertexAttribPointer(attribute.getIndex(), attribute.getSize(), GL11.GL_FLOAT, false, attribute.getStride(),
+                attribute.getBufferOffset());
         if (debug) {
             printError("defining Vertex Attribute Data");
         }
@@ -297,7 +372,7 @@ public final class OpenGL {
         }
     }
 
-    public static void glUniform(GLUniformData uniform) {
+    public static void glUniform(UniformData uniform) {
         switch (uniform.getUniformType()) {
             case FLOAT:
                 GL20.glUniform1(uniform.getLocation(), uniform.floatBufferValue());
@@ -391,18 +466,49 @@ public final class OpenGL {
         }
     }
 
+    public static void glCompileShader(int shader_id) {
+        GL20.glCompileShader(shader_id);
+        if (debug) {
+            printError("compiling shader with id " + shader_id);
+        }
+    }
+
+    public static int glGetProgram(int program_id, OpenGL.GL_PROGRAM_PARAMETER parameter) {
+        IntBuffer tmp = BufferUtils.createIntBuffer(1);
+        GL20.glGetProgram(program_id, parameter.getCode(), tmp);
+        return tmp.get();
+    }
+
+    public static int glGetShader(int shader_id, OpenGL.GL_SHADER_PARAMETER parameter) {
+        IntBuffer tmp = BufferUtils.createIntBuffer(1);
+        GL20.glGetShader(shader_id, parameter.getCode(), tmp);
+        return tmp.get();
+    }
+    
+    public static String glGetShaderInfoLog(int shader_id, int max_length) {
+        return GL20.glGetShaderInfoLog(shader_id, max_length);
+    }
+    
+    public static void glShaderSource(int shader, String shader_source) {
+        GL20.glShaderSource(shader, shader_source);
+    }
+
     private static void printError(String description) {
         switch (glGetError()) {
             case GL_NO_ERROR:
                 break;
             case GL_INVALID_ENUM:
                 System.err.println("An invalid enum error occured on " + description);
+                break;
             case GL_INVALID_VALUE:
                 System.err.println("An invalid value error occured: " + description);
+                break;
             case GL_INVALID_OPERATION:
                 System.err.println("An invalid operation error occured: " + description);
+                break;
             case GL_INVALID_FRAMEBUFFER_OPERATION:
                 System.err.println("An invalid framebuffer operation error occured: " + description);
+                break;
             case GL_OUT_OF_MEMORY:
                 System.err.println("An out of memory error occured: " + description);
         }
