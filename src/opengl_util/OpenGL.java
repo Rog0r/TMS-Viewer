@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -24,6 +25,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.PixelFormat;
 import shaderutil.UniformData;
 
 /**
@@ -219,8 +221,12 @@ public final class OpenGL {
     private static boolean debug;
 
     private OpenGL() {
+        ContextAttribs ca = new ContextAttribs(3, 3).withForwardCompatible(true).withProfileCore(true);
+        PixelFormat pf = new PixelFormat();
+
         try {
-            Display.create();
+            Display.create(pf, ca);
+            System.out.println("OpenGL version: " + GL11.glGetString(GL11.GL_VERSION));
         } catch (LWJGLException ex) {
             Logger.getLogger(OpenGL.class.getName()).log(Level.SEVERE, null, ex);
         }
