@@ -5,8 +5,12 @@
 package opengl_util;
 
 import bufferutil.VertexAttribute;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
@@ -19,6 +23,7 @@ import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33;
 import shaderutil.UniformData;
 
 /**
@@ -186,6 +191,29 @@ public final class OpenGL {
             return code;
         }
     }
+
+    public static enum GL_VERTEXATTRIBUTE_TYPE {
+
+        GL_BYTE(GL11.GL_BYTE),
+        GL_UNSIGNED_BYTE(GL11.GL_UNSIGNED_BYTE),
+        GL_SHORT(GL11.GL_SHORT),
+        GL_UNSIGNED_SHORT(GL11.GL_UNSIGNED_SHORT),
+        GL_INT(GL11.GL_INT),
+        GL_UNSIGNED_INT(GL11.GL_UNSIGNED_INT),
+        GL_HALF_FLOAT(GL30.GL_HALF_FLOAT),
+        GL_FLOAT(GL11.GL_FLOAT),
+        GL_DOUBLE(GL11.GL_DOUBLE),
+        GL_INT_2_10_10_10_REV(GL33.GL_INT_2_10_10_10_REV);
+        private int value;
+
+        private GL_VERTEXATTRIBUTE_TYPE(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
     private static final OpenGL INSTANCE = new OpenGL();
     private OpenGLState current_state;
     private static boolean debug;
@@ -291,8 +319,19 @@ public final class OpenGL {
         }
     }
 
-    public static void glBufferData(GL_BUFFER_TARGET buffer_target, FloatBuffer vertices, GL_BUFFER_USAGE buffer_usage) {
-        GL15.glBufferData(buffer_target.getTarget(), vertices, buffer_usage.getUsage());
+    public static void glBufferData(GL_BUFFER_TARGET buffer_target, Buffer data, GL_BUFFER_USAGE buffer_usage) {
+        if (data instanceof FloatBuffer) {
+            GL15.glBufferData(buffer_target.getTarget(), (FloatBuffer) data, buffer_usage.getUsage());
+        } else if (data instanceof IntBuffer) {
+            GL15.glBufferData(buffer_target.getTarget(), (FloatBuffer) data, buffer_usage.getUsage());
+        } else if (data instanceof ByteBuffer) {
+            GL15.glBufferData(buffer_target.getTarget(), (ByteBuffer) data, buffer_usage.getUsage());
+        } else if (data instanceof DoubleBuffer) {
+            GL15.glBufferData(buffer_target.getTarget(), (DoubleBuffer) data, buffer_usage.getUsage());
+        } else if (data instanceof ShortBuffer) {
+            GL15.glBufferData(buffer_target.getTarget(), (ShortBuffer) data, buffer_usage.getUsage());
+        }
+
         if (debug) {
             printError("writing to Buffertarget " + buffer_target + "..");
         }
@@ -306,7 +345,7 @@ public final class OpenGL {
     }
 
     public static void glVertexAttribPointer(VertexAttribute attribute) {
-        GL20.glVertexAttribPointer(attribute.getIndex(), attribute.getSize(), GL11.GL_FLOAT, false, attribute.getStride(),
+        GL20.glVertexAttribPointer(attribute.getIndex(), attribute.getSize(), attribute.getType().getValue(), attribute.isNormalized(), attribute.getStride(),
                 attribute.getBufferOffset());
         if (debug) {
             printError("defining Vertex Attribute Data");
@@ -484,11 +523,11 @@ public final class OpenGL {
         GL20.glGetShader(shader_id, parameter.getCode(), tmp);
         return tmp.get();
     }
-    
+
     public static String glGetShaderInfoLog(int shader_id, int max_length) {
         return GL20.glGetShaderInfoLog(shader_id, max_length);
     }
-    
+
     public static void glShaderSource(int shader, String shader_source) {
         GL20.glShaderSource(shader, shader_source);
     }

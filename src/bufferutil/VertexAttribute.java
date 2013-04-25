@@ -4,6 +4,8 @@
  */
 package bufferutil;
 
+import opengl_util.OpenGL;
+
 /**
  *
  * @author Roger
@@ -12,29 +14,19 @@ public class VertexAttribute {
 
     private int index;
     private int size;
-    private String name;
-    private long bufferOffset;
+    private OpenGL.GL_VERTEXATTRIBUTE_TYPE type;
+    private boolean normalized;
+    private long buffer_offset;
     private int stride;
 
-    public VertexAttribute(int position, int valsPerVertex, String name) {
-    	this(position, valsPerVertex, name, 0, 0);
-    }
-    
-    public VertexAttribute(int position, int valsPerVertex, String name, long bufferOffset) {
-    	this(position, valsPerVertex, name, 0, bufferOffset);
-    }
-    
-    public VertexAttribute(int index, int valsPerVertex, String name, int stride, long bufferOffset) {
+    public VertexAttribute(int index, int size, OpenGL.GL_VERTEXATTRIBUTE_TYPE type, boolean normalized, int stride, long buffer_offset) {
         this.index = index;
-        this.size = valsPerVertex;
-        this.name = name;
+        this.size = size;
+        this.type = type;
+        this.normalized = normalized;
         this.stride = stride;
-        this.bufferOffset = bufferOffset;
+        this.buffer_offset = buffer_offset;
 
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getIndex() {
@@ -44,12 +36,20 @@ public class VertexAttribute {
     public int getSize() {
         return this.size;
     }
-    
+
+    public OpenGL.GL_VERTEXATTRIBUTE_TYPE getType() {
+        return type;
+    }
+
+    public boolean isNormalized() {
+        return normalized;
+    }
+
     public int getStride() {
         return this.stride;
     }
-    
+
     public long getBufferOffset() {
-        return this.bufferOffset;
+        return this.buffer_offset;
     }
 }

@@ -130,7 +130,10 @@ public class ShaderProgram {
             System.out.println("ShaderProgram: Shader with id " + shader_id + " compiled successfully");
         } else {
             System.err.println("ShaderProgram: Error compiling Shader with id " + shader_id + ". Error Log:\n" + OpenGL.glGetShaderInfoLog(shader_id, 4096));
-//            System.out.println(OpenGL.glGetShaderInfoLog(shader_id, 4096));
         }
     }
+
+    public List<UniformData> getUniform_data() {
+        return uniform_data;
+    }        
 }
