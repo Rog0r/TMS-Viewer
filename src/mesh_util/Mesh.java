@@ -7,9 +7,7 @@ package mesh_util;
 import java.util.LinkedList;
 import java.util.List;
 import org.lwjgl.util.vector.Matrix4f;
-import mesh_util.Geometry;
 import org.lwjgl.util.vector.Vector3f;
-import opengl_util.OpenGL;
 import opengl_util.OpenGL;
 
 /**
@@ -20,7 +18,7 @@ public class Mesh {
     
     private Matrix4f model_world_matrix;
     private List<Geometry> geometry;
-    private OpenGL openGL;
+    protected OpenGL openGL;
     
     public Mesh() {
         model_world_matrix = new Matrix4f();
@@ -31,7 +29,7 @@ public class Mesh {
         openGL = OpenGL.getInstance();
     }
 
-    public void addGeometry(Geometry geometry) {
+    protected void addGeometry(Geometry geometry) {
         this.geometry.add(geometry);
     }
     
